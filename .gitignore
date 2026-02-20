@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+data/price_tracker.db
+.env
+.ipynb_checkpoints
+.DS_Store
