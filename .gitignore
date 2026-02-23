@@ -4,3 +4,4 @@ data/price_tracker.db
 .env
 .ipynb_checkpoints
 .DS_Store
+price_tracker_notes.ipynb
