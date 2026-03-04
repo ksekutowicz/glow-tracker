@@ -1,7 +1,15 @@
 __pycache__/
 *.pyc
-data/price_tracker.db
+
+# data
+data/
+
+# env
 .env
+
+# notebooks
 .ipynb_checkpoints
-.DS_Store
 price_tracker_notes.ipynb
+
+# system
+.DS_Store

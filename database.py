@@ -9,37 +9,39 @@ def connection():
 def db_initialization():
     con = connection()
     cur = con.cursor()
-    cur.execute("CREATE TABLE products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, brand TEXT NOT NULL, url TEXT NOT NULL, target_price REAL, description TEXT, created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-    cur.execute("CREATE TABLE price_history (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER, price REAL, checked_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(product_id) REFERENCES products(id))")
+    cur.execute('CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, brand TEXT NOT NULL, url TEXT NOT NULL UNIQUE, target_price REAL, description TEXT, created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)')
+    cur.execute('CREATE TABLE IF NOT EXISTS price_history (id INTEGER PRIMARY KEY AUTOINCREMENT, product_id INTEGER, price REAL, checked_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY(product_id) REFERENCES products(id))')
     con.commit()
     con.close()
 
 def add_product(name, brand, url, target_price = None, description = None):
     con = connection()
     cur = con.cursor()
-    cur.execute("""
+    cur.execute('''
     INSERT INTO products (name, brand, url, target_price, description)
-    VALUES (?,?,?,?,?)""", (name, brand, url, target_price, description))
+    VALUES (?,?,?,?,?)''', (name, brand, url, target_price, description))
+    product_id = cur.lastrowid
     con.commit()
     con.close()
+    return product_id
 
 def add_price(product_id, price):
     con = connection()
     cur =  con.cursor()
-    cur.execute("""
+    cur.execute('''
     INSERT INTO price_history (product_id, price)
-    VALUES (?,?)""", (product_id, price))
+    VALUES (?,?)''', (product_id, price))
     con.commit()
     con.close()
 
 def get_last_price(product_id):
     con = connection()
     cur =  con.cursor()
-    cur.execute("""
+    cur.execute('''
     SELECT price FROM price_history
     WHERE product_id = ?
     ORDER BY checked_time DESC
-    LIMIT 1""", (product_id))
+    LIMIT 1''', (product_id))
     result = cur.fetchone()
     con.close()
     return result[0] if result else None
@@ -47,8 +49,8 @@ def get_last_price(product_id):
 def get_all_products():
     con = connection()
     cur =  con.cursor()
-    cur.execute("""
-    SELECT * FROM products""")
+    cur.execute('''
+    SELECT * FROM products''')
     products = cur.fetchall()
     con.close()
     return products
