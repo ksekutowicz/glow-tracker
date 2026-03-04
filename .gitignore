@@ -1,15 +1,10 @@
 __pycache__/
 *.pyc
 
-# data
-data/
+data/*.csv
+data/*.db
 
-# env
 .env
-
-# notebooks
 .ipynb_checkpoints
-price_tracker_notes.ipynb
-
-# system
 .DS_Store
+price_tracker_notes.ipynb
