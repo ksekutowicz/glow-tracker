@@ -3,45 +3,45 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from urllib.parse import urljoin
 import time
+from datetime import datetime
 import random
-import os
 
-# ==============================
-# KONFIGURACJA
-# ==============================
+from config import *
 
-headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120.0 Safari/537.36'}
-
-base_url = 'https://cosibella.pl'
-filename = 'data/final_products.csv'
+delay = random.randint(0,600)
+print(f'Random delay: {delay} seconds')
+time.sleep(delay) #zeby zachowywac pozory ze nie jestesmy botem
 
 # ==============================
 # PRZYGOTOWANIE PLIKU
 # ==============================
 
-if not os.path.exists(filename):
+FINAL_PRODUCTS_CSV = DATA_DIR / f"final_products_{datetime.now().strftime('%d_%m_%H_%M')}.csv"
+
+FINAL_PRODUCTS_CSV.parent.mkdir(parents=True, exist_ok=True)
+
+if not FINAL_PRODUCTS_CSV.exists():
     pd.DataFrame(columns=[
         'product_id',
         'product_title',
         'product_url',
         'price'
-    ]).to_csv(filename, index=False)
+    ]).to_csv(FINAL_PRODUCTS_CSV, index=False)
 
-#wczytanie już zapisanych ID (żeby nie duplikować)
-existing_ids = set(pd.read_csv(filename)['product_id'].astype(str))
+existing_ids = set(pd.read_csv(FINAL_PRODUCTS_CSV)['product_id'].astype(str))
 
 # ==============================
 # SESJA
 # ==============================
 
 session = requests.Session()
-session.headers.update(headers)
+session.headers.update(HEADERS)
 
 # ==============================
 # POBRANIE MENU
 # ==============================
 
-r = session.get(base_url, timeout=30)
+r = session.get(BASE_URL, timeout=30)
 r.raise_for_status()
 
 soup = BeautifulSoup(r.text, 'html.parser')
@@ -53,7 +53,7 @@ for item in nav_items:
     link = item.find('a')
     if link:
         href = link.get('href')
-        full_url = urljoin(base_url, href)
+        full_url = urljoin(BASE_URL, href)
         links.append(full_url)
 
 l = pd.DataFrame({'link': links})
@@ -114,7 +114,7 @@ for i, category_url in enumerate(l2):
             if not product_id or product_id in existing_ids:
                 continue
 
-            product_url = product.get('href')
+            product_url = urljoin(BASE_URL, product.get('href'))
             product_title = product.get('title')
 
             container = product.find_parent()
@@ -133,7 +133,7 @@ for i, category_url in enumerate(l2):
                 'price': price
             }])
 
-            row.to_csv(filename, mode='a', header=False, index=False)
+            row.to_csv(FINAL_PRODUCTS_CSV, mode='a', header=False, index=False)
 
             existing_ids.add(product_id)
 

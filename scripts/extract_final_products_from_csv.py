@@ -5,9 +5,10 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 import csv
 import sqlite3
-from database import db_initialization, add_product, add_price
+from database import initialize_db, add_product, add_price
+from config import FINAL_PRODUCTS_CSV
 
-csv_path = 'data/final_products.csv'
+csv_path = FINAL_PRODUCTS_CSV
 
 def price_to_float(price_str: str) -> float | None:
 
@@ -35,7 +36,7 @@ def price_to_float(price_str: str) -> float | None:
     
 def main() -> None:
 
-    db_initialization()
+    initialize_db()
 
     products_added = 0
     prices_added = 0
@@ -64,7 +65,6 @@ def main() -> None:
                     name = str(name).strip() if name is not None else 'Unknown product',
                     brand = brand, 
                     url = url.strip(),
-                    target_price = target_price,
                     description = description
                 )
                 products_added += 1
